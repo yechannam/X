@@ -5,15 +5,17 @@ import Profile from "./routes/profile"
 import Login from "./routes/login"
 import CreateAccount from "./routes/create-account"
 import reset from "styled-reset"
-import { createGlobalStyle } from "styled-components"
+import styled, { createGlobalStyle } from "styled-components"
 import { useEffect, useState } from "react"
 import LoadingScreen from "./components/loading_screen"
+import { auth } from "./firebase"
+import ProtectedRoute from "./components/protected-route"
 
 
 const router = createBrowserRouter([
   {
     path:"/",
-    element: <Layout />,
+    element: <ProtectedRoute><Layout /></ProtectedRoute>,
     children: [
       {
         path: "",
@@ -46,21 +48,27 @@ const GlobalStyles = createGlobalStyle`
   }
 `
 
+const Wrapper = styled.div`
+ height: 100vh;
+ display: flex;
+ justify-content: center;
+`
+
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const init = async() => {
-    //wait for firebase
+    await auth.authStateReady();
     setIsLoading(false);
   }
   useEffect(() => {
     init();
   }, []);
   return (
-    <>
+    <Wrapper>
       <GlobalStyles />
       {isLoading ? <LoadingScreen /> : <RouterProvider router={router} />}
-    </>
-  )
+    </Wrapper>
+  );
 }
 
 export default App
